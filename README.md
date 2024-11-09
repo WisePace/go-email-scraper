@@ -13,9 +13,28 @@ The scraper supports concurrent scraping with a configurable thread count.
 
 ## Prerequisites
 
-- Go 1.23 or later
+- Go 1.23 or later (for building from source)
 
 ## Installation
+
+### From Releases
+
+1. Download the appropriate binary for your platform:
+    ```sh
+    wget https://github.com/WisePace/pace-scraper/releases/download/v1.0.0/email-scraper-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)
+    ```
+
+2. Make the binary executable:
+    ```sh
+    chmod +x email-scraper-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m)
+    ```
+
+3. Move the binary to a directory in your `PATH` (e.g., `/usr/local/bin`):
+    ```sh
+    sudo mv email-scraper-$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m) /usr/local/bin/email-scraper
+    ```
+
+### From Source
 
 1. Clone the repository:
     ```sh
@@ -28,6 +47,11 @@ The scraper supports concurrent scraping with a configurable thread count.
     go mod tidy
     ```
 
+3. Build the binary:
+    ```sh
+    go build -o email-scraper main.go
+    ```
+
 ## Usage
 
 ### Email Scraper
@@ -36,10 +60,12 @@ The scraper supports concurrent scraping with a configurable thread count.
 
 2. Run the scraper:
     ```sh
-    go run main.go
+    email-scraper
     ```
 
-3. The scraper will read the domains from `domains.txt`, scrape emails, and append them to `email_list.txt`. Logs will be written to `app.log` and `error.log`.
+The scraper will read the domains from `domains.txt`, scrape emails, and append them to `email_list.txt`. 
+
+Logs will be written to `app.log` and `error.log`.
 
 ## Configuration
 
@@ -48,18 +74,13 @@ The scraper supports concurrent scraping with a configurable thread count.
 
 Example:
 ```sh
-THREAD_COUNT=20 DOMAINS_FILE=domains.txt go run main.go
+THREAD_COUNT=20 DOMAINS_FILE=domains.txt email-scraper
 ```
-
-## File Structure
-
-- `main.go`: Entry point for the email scraper.
-- `scraper.go`: Contains the scraping logic.
-- `domains.txt`: List of domains to scrape.
-- `email_list.txt`: Output file for found emails.
-- `app.log`: Log file for general logs.
-- `error.log`: Log file for error logs.
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Author
+
+- [Christofher](https://github.com/KostLinux)
