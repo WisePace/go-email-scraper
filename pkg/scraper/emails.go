@@ -71,16 +71,17 @@ func FindEmails(domains []string, emailListFile *os.File, logger *log.Logger, ex
 
 	threadCount := os.Getenv("THREAD_COUNT")
 	if threadCount == "" {
-		threadCount = "300" // Increase the default thread count
+		threadCount = "100" // Increase the default thread count
 	}
 
 	threads, err := strconv.Atoi(threadCount)
 	if err != nil {
 		logger.Printf("Error parsing THREAD_COUNT: %v", err)
-		threads = 300 // Default to 300 threads if parsing fails
+		threads = 100
 	}
 
-	buffer := make(chan struct{}, threads) // Buffered channel to control concurrency
+	// Use a buffered channel to limit the number of concurrent goroutines
+	buffer := make(chan struct{}, threads)
 	for _, domain := range domains {
 		wg.Add(1)
 		scannedDomains++
