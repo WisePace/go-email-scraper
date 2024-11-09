@@ -58,6 +58,14 @@ The scraper supports concurrent scraping with a configurable thread count.
 
 1. Prepare your `domains.txt` file with a list of domains to scrape, one per line.
 
+    Example:
+    ```sh
+    $ cat domains.txt
+
+    example.com
+    example.org
+    ```
+
 2. Run the scraper:
     ```sh
     email-scraper

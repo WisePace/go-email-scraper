@@ -1,15 +1,18 @@
 package main
 
 import (
-	spinner "email-scraper/pkg/animation"
+	"bufio"
 	"email-scraper/pkg/log"
 	"email-scraper/pkg/scraper"
+	"email-scraper/pkg/spinner"
+	"fmt"
 	logger "log"
 	"os"
 	"time"
 )
 
 func main() {
+	startTime := time.Now()
 	logger.Println("Starting the email scraper...")
 
 	// Open log files
@@ -32,26 +35,26 @@ func main() {
 	errorLogger.Println("Error log file opened successfully.")
 
 	// Initialize spinner
-	s := spinner.New([]rune{'|', '/', '-', '\\'}, 100*time.Millisecond)
-	s.Start()
+	spin := spinner.New([]rune{'|', '/', '-', '\\'}, 100*time.Millisecond)
+	spin.Start()
 
 	// Read existing emails into a set
-	s.Suffix(" Reading existing emails...")
+	spin.Suffix(" Reading existing emails...")
 	existingEmails, err := scraper.ReadExistingEmails("email_list.txt")
 	if err != nil {
-		s.Stop()
+		spin.Stop()
 		errorLogger.Printf("Error reading existing emails: %v", err)
 		logger.Printf("Error reading existing emails: %v\n", err)
 		return
 	}
-	s.Suffix(" Successfully read existing emails.")
+	spin.Suffix(" Successfully read existing emails.")
 	logger.Println("Successfully read existing emails.")
 
 	// Reopen email list file in append mode
-	s.Suffix(" Opening email list file in append mode...")
+	spin.Suffix(" Opening email list file in append mode...")
 	emailListFile, err := os.OpenFile("email_list.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o666)
 	if err != nil {
-		s.Stop()
+		spin.Stop()
 		errorLogger.Printf("Error opening email list file: %v", err)
 		return
 	}
@@ -64,20 +67,48 @@ func main() {
 	}
 
 	// Read domains from domains.txt
-	s.Suffix(" Reading domains from file...")
+	spin.Suffix(" Reading domains from file...")
 	domains, err := scraper.ReadDomains(file)
 	if err != nil {
-		s.Stop()
+		spin.Stop()
 		errorLogger.Printf("Error reading domains: %v", err)
 		return
 	}
 	logger.Println("Successfully read domains from file.")
 
 	// Find emails for all domains
-	s.Suffix(" Finding emails for all domains...")
-	foundEmails, scannedDomains := scraper.FindEmails(domains, emailListFile, errorLogger, existingEmails)
+	spin.Suffix(" Finding emails for all domains...")
+	scannedDomains := scraper.FindEmails(domains, emailListFile, errorLogger, existingEmails)
 
-	s.Stop()
-	logger.Printf("Scanned domains: %d, Found emails: %d\n", scannedDomains, foundEmails)
-	logger.Printf("Scanned domains: %d, Found emails: %d\n", scannedDomains, foundEmails)
+	spin.Stop()
+	duration := time.Since(startTime)
+
+	// Count emails from file
+	emailCount, err := countLines("email_list.txt")
+	if err != nil {
+		logger.Printf("Error counting emails: %v\n", err)
+		fmt.Printf("Error counting emails: %v\n", err)
+		return
+	}
+
+	logger.Printf("Scanned domains: %d, Found emails: %d, Time consumed: %s\n", scannedDomains, emailCount, duration)
+	fmt.Printf("Scanned domains: %d, Found emails: %d, Time consumed: %s\n", scannedDomains, emailCount, duration)
+}
+
+func countLines(fileName string) (int, error) {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	count := 0
+	for scanner.Scan() {
+		count++
+	}
+	if err := scanner.Err(); err != nil {
+		return 0, err
+	}
+	return count, nil
 }

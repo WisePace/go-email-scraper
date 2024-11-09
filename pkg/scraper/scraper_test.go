@@ -1,6 +1,7 @@
 package scraper
 
 import (
+	"bufio"
 	"log"
 	"os"
 	"testing"
@@ -64,13 +65,37 @@ func TestFindEmails(t *testing.T) {
 	logger := log.New(os.Stdout, "TEST: ", log.LstdFlags)
 	existingEmails := make(map[string]struct{})
 
-	foundEmails, scannedDomains := FindEmails(domains, emailListFile, logger, existingEmails)
-
-	if foundEmails != 0 {
-		t.Errorf("Expected 0 found emails, got %d", foundEmails)
-	}
+	scannedDomains := FindEmails(domains, emailListFile, logger, existingEmails)
 
 	if scannedDomains != 1 {
 		t.Errorf("Expected 1 scanned domain, got %d", scannedDomains)
 	}
+
+	// Count emails from file
+	emailCount, err := countLines("test_email_list.txt")
+	if err != nil {
+		t.Fatalf("Error counting emails: %v", err)
+	}
+
+	if emailCount != 0 {
+		t.Errorf("Expected 0 found emails, got %d", emailCount)
+	}
+}
+
+func countLines(fileName string) (int, error) {
+	file, err := os.Open(fileName)
+	if err != nil {
+		return 0, err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	count := 0
+	for scanner.Scan() {
+		count++
+	}
+	if err := scanner.Err(); err != nil {
+		return 0, err
+	}
+	return count, nil
 }

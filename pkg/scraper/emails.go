@@ -65,20 +65,19 @@ func ReadDomains(fileName string) ([]string, error) {
 	return domains, nil
 }
 
-func FindEmails(domains []string, emailListFile *os.File, logger *log.Logger, existingEmails map[string]struct{}) (int, int) {
+func FindEmails(domains []string, emailListFile *os.File, logger *log.Logger, existingEmails map[string]struct{}) int {
 	var wg sync.WaitGroup
-	var foundEmails int
 	var scannedDomains int
 
 	threadCount := os.Getenv("THREAD_COUNT")
 	if threadCount == "" {
-		threadCount = "10"
+		threadCount = "300" // Increase the default thread count
 	}
 
 	threads, err := strconv.Atoi(threadCount)
 	if err != nil {
 		logger.Printf("Error parsing THREAD_COUNT: %v", err)
-		threads = 10 // Default to 10 threads if parsing fails
+		threads = 300 // Default to 300 threads if parsing fails
 	}
 
 	buffer := make(chan struct{}, threads) // Buffered channel to control concurrency
@@ -104,14 +103,13 @@ func FindEmails(domains []string, emailListFile *os.File, logger *log.Logger, ex
 						logger.Printf("Error writing email to file: %v", err)
 					}
 					existingEmails[email] = struct{}{}
-					foundEmails++
 				}
 			}
 		}(domain)
 	}
 
 	wg.Wait()
-	return foundEmails, scannedDomains
+	return scannedDomains
 }
 
 func scrapeEmailsFromDomain(url string) ([]string, error) {
