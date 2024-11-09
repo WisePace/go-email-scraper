@@ -30,7 +30,7 @@ jobs:
       - name: Build
         run: |
           mkdir -p dist
-          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/email-scraper-${{ matrix.goos }}-${{ matrix.goarch }} main.go emailScraper.go
+          GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o dist/email-scraper-${{ matrix.goos }}-${{ matrix.goarch }} main.go scraper.go
 
       - name: Upload binaries
         uses: actions/upload-artifact@v4
